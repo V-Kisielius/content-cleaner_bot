@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  telegram-bot:
+    # Конфигурация сборки
+    # Build configuration
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # Имя контейнера
+    # Container name
+    container_name: telegram-content-cleaner
+
+    # Имя образа (опционально, для локального тегирования)
+    # Image name (optional, for local tagging)
+    image: telegram-content-cleaner:latest
+
+    # Политика перезапуска - всегда перезапускать при падении, но не после ручной остановки
+    # Restart policy - always restart if container stops, but not after manual stop
+    restart: unless-stopped
+
+    # Переменные окружения из .env файла
+    # Environment variables from .env file
+    env_file:
+      - .env
+
+    # Конфигурация логирования
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Health check (опционально, но рекомендуется)
+    # Простая проверка процесса
+    # Health check (optional, but recommended)
+    # Simple process check
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'python bot.py' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+    # Ограничение ресурсов (опционально, но рекомендуется)
+    # Resource limits (optional, but recommended)
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
